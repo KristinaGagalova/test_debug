@@ -1,0 +1,20 @@
+{
+  "name": "mycomanagement",
+  "homePage": "https://github.com/KristinaGagalova/mycomanagement_pilot",
+  "repos": {
+    "https://github.com/nf-core/modules.git": {
+      "modules": {
+        "nf-core": {
+          "fastqc": {
+            "branch": "master",
+            "git_sha": "f4ae1d942bd50c5c0b9bd2de1393ce38315ba57c",
+            "installed_by": ["modules"]
+          }
+        }
+      },
+      "subworkflows": {
+        "nf-core": {}
+      }
+    }
+  }
+}

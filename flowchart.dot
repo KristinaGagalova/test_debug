@@ -1,0 +1,282 @@
+digraph "flowchart" {
+v0 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.fromPath"];
+v3 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+v0 -> v3 [label="ch_genomes"];
+
+v1 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.fromPath"];
+v2 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="collect"];
+v1 -> v2;
+
+v2 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="collect"];
+v20 [label="ANNOTATE_PANGENOME_WORKFLOW:CONCAT_FASTA"];
+v2 -> v20 [label="transcripts"];
+
+v3 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+v10 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_CLEAN_GEN"];
+v3 -> v10 [label="genome"];
+
+v4 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.empty"];
+v5 [shape=point];
+v4 -> v5 [label="fasta_filt_clean"];
+
+v6 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.empty"];
+v7 [shape=point];
+v6 -> v7 [label="fasta_filt_clean_sort"];
+
+v8 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.empty"];
+v9 [shape=point];
+v8 -> v9 [label="fasta_stats"];
+
+v10 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_CLEAN_GEN"];
+v12 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_SORT"];
+v10 -> v12 [label="fasta_filt_clean"];
+
+v10 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_CLEAN_GEN"];
+v11 [shape=point];
+v10 -> v11;
+
+v12 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_SORT"];
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v12 -> v32 [label="genome"];
+
+v12 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_SORT"];
+v13 [shape=point];
+v12 -> v13;
+
+v10 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_CLEAN_GEN"];
+v14 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:GAAS_FASTASTATISTICS"];
+v10 -> v14 [label="fasta_filt_clean"];
+
+v14 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:GAAS_FASTASTATISTICS"];
+v16 [shape=point];
+v14 -> v16 [label="fasta_stats"];
+
+v14 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:GAAS_FASTASTATISTICS"];
+v15 [shape=point];
+v14 -> v15;
+
+v17 [shape=point,label="",fixedsize=true,width=0.1];
+v19 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATE_SETUP"];
+v17 -> v19 [label="buscodb"];
+
+v18 [shape=point,label="",fixedsize=true,width=0.1];
+v19 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATE_SETUP"];
+v18 -> v19 [label="funannotate_db"];
+
+v19 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATE_SETUP"];
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v19 -> v43 [label="funannotate_setup"];
+
+v20 [label="ANNOTATE_PANGENOME_WORKFLOW:CONCAT_FASTA"];
+v21 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:GAAS_FASTACLEANER"];
+v20 -> v21 [label="transcripts"];
+
+v21 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:GAAS_FASTACLEANER"];
+v23 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:EXONERATE_FASTACLEAN"];
+v21 -> v23;
+
+v21 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:GAAS_FASTACLEANER"];
+v22 [shape=point];
+v21 -> v22;
+
+v23 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:EXONERATE_FASTACLEAN"];
+v25 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:SEQKIT_DEDUP_FASTA"];
+v23 -> v25;
+
+v23 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:EXONERATE_FASTACLEAN"];
+v24 [shape=point];
+v23 -> v24;
+
+v25 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:SEQKIT_DEDUP_FASTA"];
+v27 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_SEQCLEAN"];
+v25 -> v27;
+
+v25 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:SEQKIT_DEDUP_FASTA"];
+v26 [shape=point];
+v25 -> v26;
+
+v27 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_SEQCLEAN"];
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v27 -> v32;
+
+v27 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_SEQCLEAN"];
+v28 [shape=point];
+v27 -> v28;
+
+v29 [shape=point,label="",fixedsize=true,width=0.1];
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v29 -> v32 [label="pasa_config"];
+
+v30 [shape=point,label="",fixedsize=true,width=0.1];
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v30 -> v32 [label="pasa_config_dir"];
+
+v31 [shape=point,label="",fixedsize=true,width=0.1];
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v31 -> v32 [label="max_intron_size"];
+
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v36 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ASMBLSTOTRAINING"];
+v32 -> v36;
+
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v35 [shape=point];
+v32 -> v35;
+
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v34 [shape=point];
+v32 -> v34;
+
+v32 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ALIGNASSEMBLE"];
+v33 [shape=point];
+v32 -> v33;
+
+v36 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ASMBLSTOTRAINING"];
+v39 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v36 -> v39 [label="pasa_predictions"];
+
+v36 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ASMBLSTOTRAINING"];
+v38 [shape=point];
+v36 -> v38;
+
+v36 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:PASA_ASMBLSTOTRAINING"];
+v37 [shape=point];
+v36 -> v37;
+
+v12 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_SORT"];
+v39 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v12 -> v39 [label="genome"];
+
+v39 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v40 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_TRANSCRIPTOME_PREDICT"];
+v39 -> v40 [label="ch_genome_pasa"];
+
+v40 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_TRANSCRIPTOME_PREDICT"];
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v40 -> v43;
+
+v41 [shape=point,label="",fixedsize=true,width=0.1];
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v41 -> v43 [label="protein"];
+
+v20 [label="ANNOTATE_PANGENOME_WORKFLOW:CONCAT_FASTA"];
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v20 -> v43 [label="transcripts"];
+
+v42 [shape=point,label="",fixedsize=true,width=0.1];
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v42 -> v43 [label="species"];
+
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v46 [shape=point];
+v43 -> v46 [label="funannotate_predictions"];
+
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v43 -> v59 [label="protseq"];
+
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v60 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v43 -> v60 [label="cds"];
+
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v43 -> v47;
+
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v45 [shape=point];
+v43 -> v45;
+
+v43 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:FUNANNOTATEPASA_GENE_PREDICTION_CQ"];
+v44 [shape=point];
+v43 -> v44;
+
+v12 [label="ANNOTATE_PANGENOME_WORKFLOW:ASSEMBLY_PREPROCESS_FUNANNOTATE:FUNANNOTATE_SORT"];
+v47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v12 -> v47 [label="genome"];
+
+v47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v48 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_EXTRACT_CDS"];
+v47 -> v48 [label="input_fasta"];
+
+v48 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_EXTRACT_CDS"];
+v49 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_CDS_FILTER_PROCESS"];
+v48 -> v49;
+
+v49 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_CDS_FILTER_PROCESS"];
+v50 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatMap"];
+v49 -> v50;
+
+v50 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatMap"];
+v51 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:SIGNALP_RUN"];
+v50 -> v51 [label="files_to_process"];
+
+v51 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:SIGNALP_RUN"];
+v52 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+v51 -> v52;
+
+v52 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+v53 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:SIGNALP_AGGREGATE"];
+v52 -> v53 [label="grouped_files_output"];
+
+v53 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:SIGNALP_AGGREGATE"];
+v54 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="view"];
+v53 -> v54;
+
+v54 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="view"];
+v55 [shape=point];
+v54 -> v55;
+
+v53 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:SIGNALP_AGGREGATE"];
+v56 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v53 -> v56;
+
+v47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v56 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v47 -> v56 [label="input_fasta"];
+
+v56 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v57 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_PATHOGENMODE"];
+v56 -> v57 [label="joined_secretome"];
+
+v57 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_PATHOGENMODE"];
+v58 [shape=point];
+v57 -> v58 [label="annotated_cqpm"];
+
+v57 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_PATHOGENMODE"];
+v60 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v57 -> v60 [label="cds"];
+
+v57 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CQ_PATHOGEN_MODE:CQ_PATHOGENMODE"];
+v59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v57 -> v59 [label="protseq"];
+
+v59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v61 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CONCAT_ANNOTATION_PROTSEQ"];
+v59 -> v61 [label="unmerged_protseq"];
+
+v60 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v62 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CONCAT_ANNOTATION_CDS"];
+v60 -> v62 [label="unmerged_cds"];
+
+v61 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CONCAT_ANNOTATION_PROTSEQ"];
+v63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v61 -> v63 [label="protseq_meta"];
+
+v62 [label="ANNOTATE_PANGENOME_WORKFLOW:FUNANNOTATEPREDICT_ALT_PIPELINE:CONCAT_ANNOTATION_CDS"];
+v63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v62 -> v63 [label="cds_meta"];
+
+v63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+v64 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+v63 -> v64 [label="cds_protseq_meta"];
+
+v64 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+v65 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="collect"];
+v64 -> v65;
+
+v65 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="collect"];
+v66 [shape=point];
+v65 -> v66 [label="cds_protseq"];
+
+}
