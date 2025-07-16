@@ -1,9 +1,9 @@
 process SAMTOOLS_INDEX_GENOME {
 
+    tag "${meta.id}"
     label 'samtools'
     label 'small_task'
 
-    conda (params.enable_conda ? "bioconda::samtools=1.21" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/samtools:1.21--h50ea8bc_0':
         null }"
@@ -12,9 +12,30 @@ process SAMTOOLS_INDEX_GENOME {
     tuple val(meta), path(reference) 
 
     output:
-    tuple val(meta), path("${reference}.fai"), emit:index
+    tuple val(meta), path("${reference}.fai"), emit: index
+    path "versions.yml"                      , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
     """
-    samtools faidx ${reference}
+    samtools faidx ${args} ${reference}
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        samtools: \$(samtools --version | head -n1 | awk '{print \$2}')
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    touch ${reference}.fai
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        samtools: \$(samtools --version | head -n1 | awk '{print \$2}' || echo "1.21")
+    END_VERSIONS
     """
 }
