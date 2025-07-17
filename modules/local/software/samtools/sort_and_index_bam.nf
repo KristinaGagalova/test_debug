@@ -10,14 +10,10 @@ process SORT_AND_INDEX_BAM {
 
     input:
     tuple val(meta), path(sam)
-    tuple val(meta2), path(reads)
-    tuple val(meta3), path(ubam)
 
     output:
     tuple val(meta), path("${meta.id}*.bam")     , emit: bam
     tuple val(meta), path("${meta.id}*.bam.bai") , emit: bai
-    tuple val(meta2), path(reads)                , emit: reads
-    tuple val(meta3), path(ubam)                 , emit: ubam
     path "versions.yml"                          , emit: versions
 
     when:
@@ -35,6 +31,7 @@ process SORT_AND_INDEX_BAM {
         -@ ${threads} \\
         -O BAM \\
         ${sam} | \\
+        ${args} \\
     tee ${output_name} | \\
     samtools index \\
         ${index_args} \\

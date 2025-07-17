@@ -39,8 +39,8 @@ workflow UBAM_QC_AND_MAPPING {
     main:
         MARK_ILLUMINA_ADAPTERS(reads, ubams)
         ALIGN_TO_REF_UBAM(bwa_index, MARK_ILLUMINA_ADAPTERS.out.marked_fastq)
-        SORT_AND_INDEX_BAM(ALIGN_TO_REF_UBAM.out)
-        MARK_DUPLICATES(SORT_AND_INDEX_BAM.out)
+        SORT_AND_INDEX_BAM(ALIGN_TO_REF_UBAM.out.bam, MARK_ILLUMINA_ADAPTERS.out.marked_fastq, ubams)
+        MARK_DUPLICATES(SORT_AND_INDEX_BAM.out.bam)
         MERGE_BAM_WITH_UBAM(MARK_DUPLICATES.out, reference, seq_dict)
     
     emit:
