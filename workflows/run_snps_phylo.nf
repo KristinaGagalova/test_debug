@@ -36,7 +36,7 @@ workflow SNPS_PHYLO_WORKFLOW {
     // QC and mapping
     UBAM_QC_AND_MAPPING(
         fastq,
-        GENERATE_UBAM.out, 
+        GENERATE_UBAM.out.ubam, 
         ref_tuple, 
         CREATE_INDEX.out.bwa_index,
         CREATE_INDEX.out.seq_dict
