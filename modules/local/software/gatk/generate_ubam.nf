@@ -22,10 +22,12 @@ process GENERATE_UBAM {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def platform = task.ext.platform ?: "ILLUMINA"
     def sequencing_center = task.ext.sequencing_center ?: "Unknown"
-    def run_date = task.ext.run_date ?: new Date().format("yyyy-MM-dd'T'HH:mm:ss")
     
     """
     mkdir -p tmp
+
+    # Generate current date and time in ISO format
+    RUN_DATE=\$(date '+%Y-%m-%dT%H:%M:%S')
 
     gatk FastqToSam \\
         --FASTQ ${reads[0]} \\
@@ -36,7 +38,7 @@ process GENERATE_UBAM {
         --LIBRARY_NAME ${prefix} \\
         --PLATFORM ${platform} \\
         --SEQUENCING_CENTER ${sequencing_center} \\
-        --RUN_DATE ${run_date} \\
+        --RUN_DATE \$RUN_DATE \\
         --TMP_DIR tmp \\
         ${args}
 
