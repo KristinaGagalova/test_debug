@@ -6,24 +6,23 @@ include { BUILD_TREE }                       from '../subworkflows/local/run_snp
 include { GENERATE_UBAM }                    from '../modules/local/software/gatk/generate_ubam.nf'
 include { VARIANT_CALLING }                  from '../modules/local/software/gatk/variant_calling.nf'
 
-// Parameter validation
-if (params.ref) { 
-    reference = file(params.ref, checkIfExists: true) 
-} else { 
-    exit 1, 'No reference genome specified!' 
-}
+workflow SNPS_PHYLO_WORKFLOW {
 
-if (params.fastq) {
+    // Parameter validation and input channels
+    if (!params.ref) {
+        exit 1, 'No reference genome specified!'
+    }
+    if (!params.fastq) {
+        exit 1, 'No reads specified!'
+    }
+
+    reference = file(params.ref, checkIfExists: true)
     fastq = Channel.fromFilePairs(params.fastq, checkIfExists: true)
         .map { sample_id, reads -> 
             def meta = [id: sample_id]
             [meta, reads]
         }
-} else { 
-    exit 1, 'No reads specified!' 
-}
 
-workflow SNPS_PHYLO_WORKFLOW {
     // Create reference metadata
     ref_meta = [id: reference.baseName]
     ref_tuple = tuple(ref_meta, reference)
@@ -36,9 +35,10 @@ workflow SNPS_PHYLO_WORKFLOW {
     
     // QC and mapping
     UBAM_QC_AND_MAPPING(
+        fastq
         GENERATE_UBAM.out, 
         ref_tuple, 
-        CREATE_INDEX.out.bwa_index, 
+        CREATE_INDEX.out.bwa_index,
         CREATE_INDEX.out.seq_dict
     )
     
