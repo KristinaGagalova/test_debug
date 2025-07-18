@@ -11,8 +11,7 @@ process COMBINE_AND_GENOTYPE_VCF {
     input:
     path gvcfs
     tuple val(meta), path(reference)
-    tuple val(meta), path(fai_index)
-    tuple val(meta), path(seq_dict)
+    tuple val(meta1), path(fai_index)
 
     output:
     tuple val(meta), path("*.combined_panel.vcf")     , emit: vcf

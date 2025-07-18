@@ -10,12 +10,12 @@ process QUALITY_FILTER_VARIANTS {
 
     input:
     tuple val(meta), path(snp_vcf)
-    tuple val(meta), path(snp_vcf_index)
-    tuple val(meta), path(indel_vcf)
-    tuple val(meta), path(indel_vcf_index)
+    tuple val(meta1), path(snp_vcf_index)
+    tuple val(meta2), path(indel_vcf)
+    tuple val(meta3), path(indel_vcf_index)
     tuple val(ref_meta), path(reference)
     tuple val(fai_meta), path(fai_index)
-    tuple val(dict_meta), path(seq_dict)
+    // tuple val(dict_meta), path(seq_dict)
 
     output:
     tuple val(meta), path("*.filtered.snps.vcf")     , emit: filtered_snps_vcf

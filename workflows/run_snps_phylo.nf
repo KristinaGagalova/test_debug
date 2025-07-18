@@ -38,26 +38,23 @@ workflow SNPS_PHYLO_WORKFLOW {
         fastq,
         GENERATE_UBAM.out.ubam, 
         ref_tuple, 
-        CREATE_INDEX.out.bwa_index,
-        CREATE_INDEX.out.seq_dict
+        CREATE_INDEX.out.bwa_index
     )
     
     // Variant calling
     VARIANT_CALLING(
-        UBAM_QC_AND_MAPPING.out, 
-        ref_tuple, 
-        CREATE_INDEX.out.fai_index, 
-        CREATE_INDEX.out.seq_dict
+        UBAM_QC_AND_MAPPING.out.bam,
+        UBAM_QC_AND_MAPPING.out.bam_index,
+        ref_tuple
     )
     
     // Collect all variant calls and process
     VCF_GENOTYPING_AND_FILTERING(
         VARIANT_CALLING.out.collect(), 
         ref_tuple, 
-        CREATE_INDEX.out.fai_index, 
-        CREATE_INDEX.out.seq_dict
+        CREATE_INDEX.out.fai_index
     )
     
     // Build phylogenetic tree
-    BUILD_TREE(VCF_GENOTYPING_AND_FILTERING.out)
+    BUILD_TREE(VCF_GENOTYPING_AND_FILTERING.out.vcf)
 }

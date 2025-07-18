@@ -1,4 +1,5 @@
 process VARIANT_CALLING {
+
     tag "${meta.id}"
     label 'very_large_task'
     label 'gatk'
@@ -8,16 +9,13 @@ process VARIANT_CALLING {
         'broadinstitute/gatk:4.2.6.1' }"
 
     input:
-    tuple val(meta), path(ubam)
-    tuple val(meta2), path(bam)
-    tuple val(meta3), path(bam_index)
-    tuple val(meta4), path(reference)
-    tuple val(meta5), path(fai_index)
-    tuple val(meta6), path(seq_dict)
+    tuple val(meta), path(bam)
+    tuple val(meta_bai), path(bam_index)
+    tuple val(meta2), path(reference)
 
     output:
-    tuple val(meta2), path("${meta2.id}.g.vcf"), emit: gvcf
-    tuple val(meta2), path("${meta2.id}.g.vcf.idx"), emit: gvcf_index
+    tuple val(meta), path("${meta.id}.g.vcf"), emit: gvcf
+    tuple val(meta), path("${meta.id}.g.vcf.idx"), emit: gvcf_index
     path "versions.yml", emit: versions
 
     when:
@@ -25,7 +23,7 @@ process VARIANT_CALLING {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta2.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def min_mapping_quality = task.ext.min_mapping_quality ?: 20
     def min_base_quality = task.ext.min_base_quality ?: 20
     def native_pair_hmm_threads = task.ext.native_pair_hmm_threads ?: Math.max(1, task.cpus)
@@ -54,7 +52,7 @@ process VARIANT_CALLING {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta2.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.g.vcf
     touch ${prefix}.g.vcf.idx

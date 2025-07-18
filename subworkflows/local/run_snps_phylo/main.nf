@@ -34,19 +34,18 @@ workflow UBAM_QC_AND_MAPPING {
         ubams     // tuple(meta, ubam)
         reference // tuple(meta, fasta)
         bwa_index // tuple(meta, index)
-        seq_dict  // tuple(meta, index)
 
     main:
         MARK_ILLUMINA_ADAPTERS(reads, ubams)
         ALIGN_TO_REF_UBAM(bwa_index, MARK_ILLUMINA_ADAPTERS.out.marked_fastq)
-        SORT_AND_INDEX_BAM(ALIGN_TO_REF_UBAM.out.bam, MARK_ILLUMINA_ADAPTERS.out.marked_fastq, ubams)
+        SORT_AND_INDEX_BAM(ALIGN_TO_REF_UBAM.out.bam)
         MARK_DUPLICATES(SORT_AND_INDEX_BAM.out.bam)
-        MERGE_BAM_WITH_UBAM(MARK_DUPLICATES.out, reference, seq_dict)
+        MERGE_BAM_WITH_UBAM(MARK_DUPLICATES.out.bam, ubams, reference)
     
     emit:
-        ubam      = MERGE_BAM_WITH_UBAM.out.ubam      // tuple(meta, ubam)
-        bam       = MERGE_BAM_WITH_UBAM.out.bam       // tuple(meta, bam)
-        bam_index = MERGE_BAM_WITH_UBAM.out.bam_index // tuple(meta, bai)
+        ubam      = MARK_ILLUMINA_ADAPTERS.out.marked_ubam      // tuple(meta, ubam)
+        bam       = MERGE_BAM_WITH_UBAM.out.bam                 // tuple(meta, bam)
+        bam_index = MERGE_BAM_WITH_UBAM.out.bai                 // tuple(meta, bai)
 }
 
 workflow VCF_GENOTYPING_AND_FILTERING {
@@ -54,12 +53,19 @@ workflow VCF_GENOTYPING_AND_FILTERING {
         gvcfs     // tuple(meta, gvcf)
         reference // tuple(meta, fasta)
         fai_index // tuple(meta, index)
-        seq_dict  // tuple(meta, index)
+        // seq_dict  // tuple(meta, index)
 
     main:
-        COMBINE_AND_GENOTYPE_VCF(gvcfs, reference, fai_index, seq_dict)
-        FILTER_SNPS_AND_INDELS(COMBINE_AND_GENOTYPE_VCF.out, reference, fai_index, seq_dict)
-        QUALITY_FILTER_VARIANTS(FILTER_SNPS_AND_INDELS.out, reference, fai_index, seq_dict)
+        COMBINE_AND_GENOTYPE_VCF(gvcfs, reference, fai_index)
+        FILTER_SNPS_AND_INDELS(COMBINE_AND_GENOTYPE_VCF.out.vcf, \
+                                COMBINE_AND_GENOTYPE_VCF.out.vcf_index, 
+                                reference, fai_index)
+        QUALITY_FILTER_VARIANTS(FILTER_SNPS_AND_INDELS.out.snps_vcf,
+                                FILTER_SNPS_AND_INDELS.out.snps_vcf_index,
+                                FILTER_SNPS_AND_INDELS.out.indels_vcf,
+                                FILTER_SNPS_AND_INDELS.out.indels_vcf_index,
+                                reference,
+                                fai_index)
         FINAL_FILTER_VARIANTS(QUALITY_FILTER_VARIANTS.out)
     
     emit:

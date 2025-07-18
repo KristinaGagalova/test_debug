@@ -10,10 +10,10 @@ process FILTER_SNPS_AND_INDELS {
 
     input:
     tuple val(meta), path(vcf)
-    tuple val(meta), path(vcf_index)
+    tuple val(meta1), path(vcf_index)
     tuple val(ref_meta), path(reference)
     tuple val(fai_meta), path(fai_index)
-    tuple val(dict_meta), path(seq_dict)
+    // tuple val(dict_meta), path(seq_dict)
 
     output:
     tuple val(meta), path("*.snps.vcf")     , emit: snps_vcf
@@ -30,6 +30,8 @@ process FILTER_SNPS_AND_INDELS {
     def args2 = task.ext.args2 ?: ''  // SelectVariants INDELs args
     def tmp_dir = task.ext.tmp_dir ?: "tmp"
     def ref_name = params.refname ?: meta.id
+    // Use meta to avoid unused variable error
+    println "Processing meta: ${meta}"
     """
     mkdir -p ${tmp_dir}
 

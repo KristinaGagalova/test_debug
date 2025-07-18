@@ -10,9 +10,9 @@ process FINAL_FILTER_VARIANTS {
 
     input:
     tuple val(meta), path(snps)
-    tuple val(meta), path(snps_idx)
-    tuple val(meta), path(indels)
-    tuple val(meta), path(indels_idx)
+    tuple val(meta1), path(snps_idx)
+    tuple val(meta2), path(indels)
+    tuple val(meta3), path(indels_idx)
 
     output:
     tuple val(meta), path("*.filtered.biallelic.*.snps.vcf"), emit: vcf

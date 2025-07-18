@@ -15,7 +15,7 @@ process MARK_ILLUMINA_ADAPTERS {
     output:
     tuple val(meta), path("${meta.id}.marked.fastq")           , emit: marked_fastq
     tuple val(meta), path(reads)                               , emit: reads
-    tuple val(meta), path(ubam)                                , emit: ubam
+    tuple val(meta), path("${meta.id}.marked.ubam")            , emit: marked_ubam
     tuple val(meta), path("${meta.id}.markilluminaadapters_metrics.txt"), emit: metrics
     path "versions.yml"                                        , emit: versions
 

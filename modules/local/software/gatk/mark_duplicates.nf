@@ -10,15 +10,11 @@ process MARK_DUPLICATES {
 
     input:
     tuple val(meta), path(bam)
-    tuple val(meta2), path(reads)
-    tuple val(meta3), path(ubam)
 
     output:
     tuple val(meta), path("*.marked_duplicates.bam")     , emit: bam
     tuple val(meta), path("*.marked_duplicates.txt")     , emit: metrics
     tuple val(meta), path("*.marked_duplicates.bai"), optional: true, emit: bai
-    tuple val(meta2), path(reads)                        , emit: reads
-    tuple val(meta3), path(ubam)                         , emit: ubam
     path "versions.yml"                                  , emit: versions
 
     when:

@@ -10,16 +10,12 @@ process MERGE_BAM_WITH_UBAM {
 
     input:
     tuple val(meta), path(bam)
-    tuple val(meta2), path(reads)
     tuple val(meta3), path(ubam)
     tuple val(ref_meta), path(reference)
-    tuple val(dict_meta), path(seq_dict)
 
     output:
-    tuple val(meta3), path(ubam)        , emit: ubam
     tuple val(meta), path("*.final.bam"), emit: bam
     tuple val(meta), path("*.final.bai"), emit: bai
-    tuple val(meta2), path(reads)       , emit: reads
     path "versions.yml"                 , emit: versions
 
     when:
