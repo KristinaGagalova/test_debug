@@ -39,7 +39,7 @@ process BWA_INDEX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-         bwa: \$(bwa 2>&1 | grep "Version" | awk '{print \$2}' || echo "0.7.17")
+         bwa: \$(bwa 2>&1 | grep "Version" | awk '{print \$2}')
     END_VERSIONS
     """
 }

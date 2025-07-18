@@ -56,7 +56,7 @@ process MARK_DUPLICATES {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}' || echo "4.2.6.1")
+        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6} )
     END_VERSIONS
     """
 }

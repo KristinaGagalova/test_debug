@@ -12,15 +12,15 @@ process DICT_REF {
     tuple val(meta), path(reference)  
 
     output:
-    tuple val(meta), path("*.dict"), emit: index
-    path "versions.yml"            , emit: versions
+    tuple val(meta), path("${meta.id}.dict"), emit: index
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${reference.baseName}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     gatk CreateSequenceDictionary \\
         -R ${reference} \\
@@ -40,7 +40,7 @@ process DICT_REF {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}' || echo "4.2.6.1")
+        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}')
     END_VERSIONS
     """
 }

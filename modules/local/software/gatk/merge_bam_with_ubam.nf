@@ -9,14 +9,13 @@ process MERGE_BAM_WITH_UBAM {
         null }"
 
     input:
-    tuple val(meta), path(bam)
-    tuple val(meta3), path(ubam)
-    tuple val(ref_meta), path(reference)
+    tuple val(meta), path(bam), path(ubam)
+    tuple val(meta), path(reference), path(fai), path(dict)
 
     output:
-    tuple val(meta), path("*.final.bam"), emit: bam
-    tuple val(meta), path("*.final.bai"), emit: bai
-    path "versions.yml"                 , emit: versions
+    tuple val(meta), path("${meta.id}.final.bam")    , emit: bam
+    tuple val(meta), path("${meta.id}.final.bam.bai"), emit: bai
+    path "versions.yml"                              , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -45,7 +44,7 @@ process MERGE_BAM_WITH_UBAM {
 
     gatk BuildBamIndex \\
         -I ${prefix}.final.bam \\
-        -O ${prefix}.final.bai \\
+        -O ${prefix}.final.bam.bai \\
         --TMP_DIR ${tmp_dir} \\
         ${args2}
 
@@ -63,7 +62,7 @@ process MERGE_BAM_WITH_UBAM {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}' || echo "4.2.6.1")
+        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}')
     END_VERSIONS
     """
 }

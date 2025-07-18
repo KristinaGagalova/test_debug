@@ -24,37 +24,41 @@ workflow SNPS_PHYLO_WORKFLOW {
         }
 
     // Create reference metadata
-    ref_meta = [id: reference.baseName]
-    ref_tuple = tuple(ref_meta, reference)
+    ref_tuple = Channel.of([
+                [id: reference.baseName], 
+                reference
+                ])
     
     // Create index files
     CREATE_INDEX(ref_tuple)
     
     // Generate uBAM files
     GENERATE_UBAM(fastq)
-    
+
     // QC and mapping
     UBAM_QC_AND_MAPPING(
         fastq,
         GENERATE_UBAM.out.ubam, 
         ref_tuple, 
+        CREATE_INDEX.out.ref_bundle,
         CREATE_INDEX.out.bwa_index
     )
     
+        
     // Variant calling
-    VARIANT_CALLING(
-        UBAM_QC_AND_MAPPING.out.bam,
-        UBAM_QC_AND_MAPPING.out.bam_index,
-        ref_tuple
-    )
+    //VARIANT_CALLING(
+    //    UBAM_QC_AND_MAPPING.out.bam,
+    //    UBAM_QC_AND_MAPPING.out.bam_index,
+    //    ref_tuple
+    //)
     
     // Collect all variant calls and process
-    VCF_GENOTYPING_AND_FILTERING(
-        VARIANT_CALLING.out.collect(), 
-        ref_tuple, 
-        CREATE_INDEX.out.fai_index
-    )
+    //VCF_GENOTYPING_AND_FILTERING(
+    //    VARIANT_CALLING.out.gvcf.collect(), 
+    //    ref_tuple, 
+    //    CREATE_INDEX.out.fai_index
+    //)
     
     // Build phylogenetic tree
-    BUILD_TREE(VCF_GENOTYPING_AND_FILTERING.out.vcf)
+    //BUILD_TREE(VCF_GENOTYPING_AND_FILTERING.out.vcf)
 }

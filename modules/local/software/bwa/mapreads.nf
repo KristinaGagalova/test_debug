@@ -9,12 +9,13 @@ process BWA_MAPREADS {
         null }"
 
     input:
-    tuple val(meta), path(index)
-    tuple val(meta2), path(reads)  // Can be single interleaved file or paired files
+    tuple val(meta), path(reads)  // Can be single interleaved file or paired files
+    tuple val(meta2), path(index)
+    tuple val(meta3), path(reference)
 
     output:
-    tuple val(meta), path("${meta.id}_sorted.bam"), emit: bam
-    path "versions.yml"                            , emit: versions
+    tuple val(meta), path("${meta.id}.bam"), emit: bam
+    path "versions.yml"                    , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,11 +32,15 @@ process BWA_MAPREADS {
     bwa mem \\
         -t ${threads} \\
         ${args} \\
-        ${index} \\
-        ${read_input} | \\
+        ${reference} \\
+        ${read_input} > ${prefix}.sam
+
     samtools sort \\
-        -o "${prefix}_sorted.bam" \\
-        -
+        -@ ${threads} \\
+        -o "${prefix}.bam" \\
+        ${prefix}.sam
+
+    rm ${prefix}.sam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -51,8 +56,8 @@ process BWA_MAPREADS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa: \$(bwa 2>&1 | grep "Version" | awk '{print \$2}' || echo "0.7.17")
-        samtools: \$(samtools version | head -n 1 | cut -d" " -f2 || echo "1.15")
+        bwa: \$(bwa 2>&1 | grep "Version" | awk '{print \$2}')
+        samtools: \$(samtools version | head -n 1 | cut -d" " -f2)
     END_VERSIONS
     """
 }

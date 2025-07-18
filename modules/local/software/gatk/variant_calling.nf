@@ -11,7 +11,10 @@ process VARIANT_CALLING {
     input:
     tuple val(meta), path(bam)
     tuple val(meta_bai), path(bam_index)
+    // ----
     tuple val(meta2), path(reference)
+    tuple val(meta), path(fai_index)
+    tuple val(meta), path(seq_dict)
 
     output:
     tuple val(meta), path("${meta.id}.g.vcf"), emit: gvcf
