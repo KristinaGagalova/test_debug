@@ -12,8 +12,8 @@ process SAMTOOLS_INDEX_GENOME {
     tuple val(meta), path(reference) 
 
     output:
-    tuple val(meta), path("${reference}.fai"), emit: index
-    path "versions.yml"                      , emit: versions
+    tuple val(meta), path("${reference.name}.fai"), emit: index
+    path "versions.yml"                           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,11 +31,11 @@ process SAMTOOLS_INDEX_GENOME {
 
     stub:
     """
-    touch ${reference}.fai
+    touch ${reference.name}.fai
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        samtools: \$(samtools --version | head -n1 | awk '{print \$2}' || echo "1.21")
+        samtools: \$(samtools --version | head -n1 | awk '{print \$2}')
     END_VERSIONS
     """
 }

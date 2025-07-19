@@ -9,8 +9,10 @@ process MERGE_BAM_WITH_UBAM {
         null }"
 
     input:
-    tuple val(meta), path(bam), path(ubam)
-    tuple val(meta), path(reference), path(fai), path(dict)
+    tuple val(meta), path(bam), path(ubam), path(bai)
+    path(reference)
+    path(fai)
+    path(dict)
 
     output:
     tuple val(meta), path("${meta.id}.final.bam")    , emit: bam
@@ -38,15 +40,11 @@ process MERGE_BAM_WITH_UBAM {
         -R ${reference} \\
         --TMP_DIR ${tmp_dir} \\
         --SO ${sort_order} \\
-        --CREATE_INDEX false \\
+        --CREATE_INDEX true \\
         --CLIP_ADAPTERS ${clip_adapters} \\
         ${args1}
 
-    gatk BuildBamIndex \\
-        -I ${prefix}.final.bam \\
-        -O ${prefix}.final.bam.bai \\
-        --TMP_DIR ${tmp_dir} \\
-        ${args2}
+    mv ${prefix}.final.bai ${prefix}.final.bam.bai
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

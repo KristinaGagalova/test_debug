@@ -14,7 +14,7 @@ process MARK_DUPLICATES {
     output:
     tuple val(meta), path("*.marked_duplicates.bam")     , emit: bam
     tuple val(meta), path("*.marked_duplicates.txt")     , emit: metrics
-    tuple val(meta), path("*.marked_duplicates.bai"), optional: true, emit: bai
+    tuple val(meta), path("*.marked_duplicates.bam.bai") , emit: index
     path "versions.yml"                                  , emit: versions
 
     when:
@@ -25,7 +25,7 @@ process MARK_DUPLICATES {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def tmp_dir = task.ext.tmp_dir ?: "tmp"
     def assume_sort_order = task.ext.assume_sort_order ?: "coordinate"
-    def create_index = task.ext.create_index ? "true" : "false"
+    // def create_index = task.ext.create_index ? "true" : "false"
     """
     mkdir -p ${tmp_dir}
 
@@ -35,8 +35,10 @@ process MARK_DUPLICATES {
         -M ${prefix}.marked_duplicates.txt \\
         --ASSUME_SORT_ORDER ${assume_sort_order} \\
         --TMP_DIR ${tmp_dir} \\
-        --CREATE_INDEX ${create_index} \\
+        --CREATE_INDEX true \\
         ${args}
+
+    mv ${prefix}.marked_duplicates.bai ${prefix}.marked_duplicates.bam.bai
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

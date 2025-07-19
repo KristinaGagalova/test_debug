@@ -9,12 +9,12 @@ process SORT_AND_INDEX_BAM {
         null }"
 
     input:
-    tuple val(meta), path(sam)
+    tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("${meta.id}*.bam")     , emit: bam
-    tuple val(meta), path("${meta.id}*.bam.bai") , emit: bai
-    path "versions.yml"                          , emit: versions
+    tuple val(meta), path("${meta.id}.sorted.bam")     , emit: bam
+    tuple val(meta), path("${meta.id}.sorted.bam.bai") , emit: bai
+    path "versions.yml"                                , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,19 +23,17 @@ process SORT_AND_INDEX_BAM {
     def args = task.ext.args ?: ''
     def index_args = task.ext.index_args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def ref_suffix = task.ext.ref_suffix ?: (params.refname ? "_v_${params.refname}" : "")
-    def output_name = "${prefix}${ref_suffix}.bam"
     def threads = task.ext.threads ?: task.cpus
     """
     samtools sort \\
-        -@ ${threads} \\
+        -@ ${task.cpus} \\
         -O BAM \\
-        ${sam} | \\
-        ${args} \\
-    tee ${output_name} | \\
+        -o ${meta.id}.sorted.bam \\
+        ${bam}
+
     samtools index \\
-        ${index_args} \\
-        - ${output_name}.bai
+        -@ ${task.cpus} \\
+        ${meta.id}.sorted.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -45,15 +43,13 @@ process SORT_AND_INDEX_BAM {
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def ref_suffix = task.ext.ref_suffix ?: (params.refname ? "_v_${params.refname}" : "")
-    def output_name = "${prefix}${ref_suffix}.bam"
     """
-    touch ${output_name}
-    touch ${output_name}.bai
+    touch ${prefix}.sorted.bam
+    touch ${prefix}.sorted.bam.bai
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        samtools: \$(samtools version | head -n 1 | cut -d" " -f2 || echo "1.17")
+        samtools: \$(samtools version | head -n 1 | cut -d" " -f2)
     END_VERSIONS
     """
 }

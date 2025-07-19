@@ -3,7 +3,7 @@ include { SAMTOOLS_INDEX_GENOME }        from '../../../modules/local/software/s
 include { DICT_REF }                     from '../../../modules/local/software/gatk/index_genome.nf'
 include { MARK_ILLUMINA_ADAPTERS }       from '../../../modules/local/software/gatk/mark_adapters.nf'
 include { BWA_MAPREADS as ALIGN_TO_REF_UBAM } from '../../../modules/local/software/bwa/mapreads.nf'
-include { INDEX_BAM }                    from '../../../modules/local/software/samtools/index_bam.nf'
+include { SORT_AND_INDEX_BAM }           from '../../../modules/local/software/samtools/sort_and_index_bam.nf'
 include { MARK_DUPLICATES }              from '../../../modules/local/software/gatk/mark_duplicates.nf'
 include { MERGE_BAM_WITH_UBAM }          from '../../../modules/local/software/gatk/merge_bam_with_ubam.nf'
 include { COMBINE_AND_GENOTYPE_VCF }     from '../../../modules/local/software/gatk/combine_and_genotype_vcf.nf'
@@ -22,18 +22,10 @@ workflow CREATE_INDEX {
         SAMTOOLS_INDEX_GENOME(reference)
         DICT_REF(reference)
 
-        // Combine all reference-related files
-        ref_bundle = reference
-            .join(SAMTOOLS_INDEX_GENOME.out.index, by: 0)
-            .join(DICT_REF.out.index, by: 0)
-            .map { meta, fasta, fai, dict -> 
-                [meta, fasta, fai, dict] 
-            }
-
     emit:
-        bwa_index = BWA_INDEX.out.index      // tuple(meta), path(index) path to files
-        seq_dict = DICT_REF.out.index        // path(index)
-        ref_bundle = ref_bundle              // tuple(meta, fasta, fai, dict)
+        bwa_index = BWA_INDEX.out.index            // tuple(meta), path(index) path to files
+        seq_dict = DICT_REF.out.index              // tuple(meta), path(index) path to index
+        fa_index = SAMTOOLS_INDEX_GENOME.out.index // tuple(meta), path(index) path to index
 }
 
 workflow UBAM_QC_AND_MAPPING {
@@ -41,27 +33,32 @@ workflow UBAM_QC_AND_MAPPING {
         reads      // tuple(meta, reads)
         ubams      // tuple(meta, ubam)
         reference  // path(reference)
-        ref_bundle // tuple(meta, fasta, fai, dict)
+        fa_index   // path(fai)
         bwa_index  // path(index)
+        seq_dict   // path(seq_dict)
 
     main:
         MARK_ILLUMINA_ADAPTERS(reads, ubams)
-        // Create value channels from the single files
+
+        // Extract values from tuples - these are already channels
         bwa_index_val = bwa_index.map { meta, index -> index }.first()
         reference_val = reference.map { meta, fasta -> fasta }.first()
+        fa_index_val = fa_index.map { meta, index -> index }.first()
+        seq_dict_val = seq_dict.map { meta, index -> index }.first()
 
         ALIGN_TO_REF_UBAM(MARK_ILLUMINA_ADAPTERS.out.marked_fastq,
 				bwa_index_val,
 				reference_val)
-        INDEX_BAM(ALIGN_TO_REF_UBAM.out.bam)
-        MARK_DUPLICATES(INDEX_BAM.out.bam)
+        SORT_AND_INDEX_BAM(ALIGN_TO_REF_UBAM.out.bam)
+        MARK_DUPLICATES(SORT_AND_INDEX_BAM.out.bam)
 
-        // Properly pair the BAM files with their corresponding uBAM files by sample ID
+        // Pair the BAM files with their corresponding uBAM files by sample ID
         paired_bams = MARK_DUPLICATES.out.bam
-            .join(ubams, by: 0)  // Join by meta (index 0)
-            .map { meta, bam, ubam -> [meta, bam, ubam] }
+            .join(MARK_ILLUMINA_ADAPTERS.out.marked_ubam, by: 0)  // Join by meta (index 0)
+	    .join(MARK_DUPLICATES.out.index, by: 0)  // Join the BAM index file
+            .map { meta, bam, ubam, bai -> [meta, bam, ubam, bai] }
 
-        MERGE_BAM_WITH_UBAM(paired_bams, ref_bundle)
+        MERGE_BAM_WITH_UBAM(paired_bams, reference_val, fa_index_val, seq_dict_val)
     
     emit:
         ubam      = MARK_ILLUMINA_ADAPTERS.out.marked_ubam      // tuple(meta, ubam)

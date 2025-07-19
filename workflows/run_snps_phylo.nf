@@ -39,18 +39,20 @@ workflow SNPS_PHYLO_WORKFLOW {
     UBAM_QC_AND_MAPPING(
         fastq,
         GENERATE_UBAM.out.ubam, 
-        ref_tuple,  // Extract just the fasta file
-        CREATE_INDEX.out.ref_bundle,
-        CREATE_INDEX.out.bwa_index
+        ref_tuple,
+        CREATE_INDEX.out.fa_index,
+        CREATE_INDEX.out.bwa_index,
+	CREATE_INDEX.out.seq_dict
     )
-    
         
     // Variant calling
-    //VARIANT_CALLING(
+    // VARIANT_CALLING(
     //    UBAM_QC_AND_MAPPING.out.bam,
     //    UBAM_QC_AND_MAPPING.out.bam_index,
-    //    ref_tuple
-    //)
+    //    ref_tuple.map { meta, fasta -> fasta }.first(),
+    //    CREATE_INDEX.out.fa_index,        
+    //    CREATE_INDEX.out.seq_dict        
+    // )
     
     // Collect all variant calls and process
     //VCF_GENOTYPING_AND_FILTERING(
