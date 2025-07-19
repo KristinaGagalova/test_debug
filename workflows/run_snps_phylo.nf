@@ -42,25 +42,27 @@ workflow SNPS_PHYLO_WORKFLOW {
         ref_tuple,
         CREATE_INDEX.out.fa_index,
         CREATE_INDEX.out.bwa_index,
-	CREATE_INDEX.out.seq_dict
+    	CREATE_INDEX.out.seq_dict
     )
-        
-    // Variant calling
-    // VARIANT_CALLING(
-    //    UBAM_QC_AND_MAPPING.out.bam,
-    //    UBAM_QC_AND_MAPPING.out.bam_index,
-    //    ref_tuple.map { meta, fasta -> fasta }.first(),
-    //    CREATE_INDEX.out.fa_index,        
-    //    CREATE_INDEX.out.seq_dict        
-    // )
-    
+
+    // Variant calling - use var for reuse of channels
+     VARIANT_CALLING(
+        UBAM_QC_AND_MAPPING.out.bam,
+        ref_tuple.map { meta, fasta -> fasta }.first(),
+        CREATE_INDEX.out.fa_index.map { meta, fasta -> fasta }.first(),        
+        CREATE_INDEX.out.seq_dict.map { meta, fasta -> fasta }.first()        
+     )
+
     // Collect all variant calls and process
-    //VCF_GENOTYPING_AND_FILTERING(
-    //    VARIANT_CALLING.out.gvcf.collect(), 
-    //    ref_tuple, 
-    //    CREATE_INDEX.out.fai_index
-    //)
+    VCF_GENOTYPING_AND_FILTERING(
+        "combined_panel",
+        VARIANT_CALLING.out.map { meta, gvcf -> gvcf }.collect()
+        fastq2.map { meta, reads -> reads }.collect(), 
+        ref_tuple, 
+        CREATE_INDEX.out.fa_index,
+        CREATE_INDEX.out.seq_dict
+    )
     
     // Build phylogenetic tree
-    //BUILD_TREE(VCF_GENOTYPING_AND_FILTERING.out.vcf)
+    BUILD_TREE(VCF_GENOTYPING_AND_FILTERING.out.vcf)
 }

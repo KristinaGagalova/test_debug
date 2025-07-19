@@ -9,17 +9,15 @@ process FILTER_SNPS_AND_INDELS {
         null }"
 
     input:
-    tuple val(meta), path(vcf)
-    tuple val(meta1), path(vcf_index)
-    tuple val(ref_meta), path(reference)
-    tuple val(fai_meta), path(fai_index)
-    // tuple val(dict_meta), path(seq_dict)
+    tuple val(meta), path(vcf), path(vcf_index)
+    path(reference)
+    path(fai_index)
+    path(seq_dict)
 
     output:
-    tuple val(meta), path("*.snps.vcf")     , emit: snps_vcf
-    tuple val(meta), path("*.snps.vcf.idx") , emit: snps_vcf_index
-    tuple val(meta), path("*.indels.vcf")   , emit: indels_vcf
-    tuple val(meta), path("*.indels.vcf.idx"), emit: indels_vcf_index
+    tuple val(meta),
+	path("${meta.id}.snps.vcf")   , path("${meta.id}.snps.vcf.idx"),
+	path("${meta.id}.indels.vcf") , path("${meta.id}.indels.vcf.idx") , emit: vcfs
     path "versions.yml"                     , emit: versions
 
     when:
@@ -29,9 +27,7 @@ process FILTER_SNPS_AND_INDELS {
     def args1 = task.ext.args1 ?: ''  // SelectVariants SNPs args
     def args2 = task.ext.args2 ?: ''  // SelectVariants INDELs args
     def tmp_dir = task.ext.tmp_dir ?: "tmp"
-    def ref_name = params.refname ?: meta.id
-    // Use meta to avoid unused variable error
-    println "Processing meta: ${meta}"
+    def prefix = meta.id
     """
     mkdir -p ${tmp_dir}
 
@@ -39,7 +35,7 @@ process FILTER_SNPS_AND_INDELS {
         -R ${reference} \\
         -V ${vcf} \\
         --select-type-to-include SNP \\
-        --output ${ref_name}.combined_panel.snps.vcf \\
+        --output ${prefix}.snps.vcf \\
         --tmp-dir ${tmp_dir} \\
         ${args1}
 
@@ -47,7 +43,7 @@ process FILTER_SNPS_AND_INDELS {
         -R ${reference} \\
         -V ${vcf} \\
         --select-type-to-include INDEL \\
-        --output ${ref_name}.combined_panel.indels.vcf \\
+        --output ${prefix}.indels.vcf \\
         --tmp-dir ${tmp_dir} \\
         ${args2}
 
@@ -58,16 +54,16 @@ process FILTER_SNPS_AND_INDELS {
     """
 
     stub:
-    def ref_name = params.refname ?: meta.id
+    def prefix = meta.id
     """
-    touch ${ref_name}.combined_panel.snps.vcf
-    touch ${ref_name}.combined_panel.snps.vcf.idx
-    touch ${ref_name}.combined_panel.indels.vcf
-    touch ${ref_name}.combined_panel.indels.vcf.idx
+    touch ${prefix}.snps.vcf
+    touch ${prefix}.snps.vcf.idx
+    touch ${prefix}.indels.vcf
+    touch ${prefix}.indels.vcf.idx
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}' || echo "4.2.6.1")
+        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}')
     END_VERSIONS
     """
 }

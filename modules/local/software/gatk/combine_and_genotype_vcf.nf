@@ -1,6 +1,6 @@
 process COMBINE_AND_GENOTYPE_VCF {
 
-    tag "${meta.id}"
+    tag "combined_panel"
     label 'mediumHighMem_task'
     label 'gatk'
 
@@ -9,13 +9,14 @@ process COMBINE_AND_GENOTYPE_VCF {
         null }"
 
     input:
+    val meta
     path gvcfs
-    tuple val(meta), path(reference)
-    tuple val(meta1), path(fai_index)
+    path(reference)
+    path(fai_index)
+    path(seq_dict)
 
     output:
-    tuple val(meta), path("*.combined_panel.vcf")     , emit: vcf
-    tuple val(meta), path("*.combined_panel.vcf.idx") , emit: vcf_index
+    tuple val(meta), path("${meta}.vcf"), path("${meta}.vcf.idx"), emit: vcf
     path "versions.yml"                               , emit: versions
 
     when:
@@ -25,24 +26,21 @@ process COMBINE_AND_GENOTYPE_VCF {
     def args1 = task.ext.args1 ?: ''  // CombineGVCFs args
     def args2 = task.ext.args2 ?: ''  // GenotypeGVCFs args
     def tmp_dir = task.ext.tmp_dir ?: "tmp"
-    def ref_name = params.refname ?: meta.id
+    def prefix = "${meta}"
     """
-    mkdir -p ${tmp_dir}
-    
     ls *.g.vcf > list.gvcfs.list
     
     gatk CombineGVCFs \\
         -R ${reference} \\
         --variant list.gvcfs.list \\
-        -O ${ref_name}.combined_panel.g.vcf \\
-        --TMP_DIR ${tmp_dir} \\
+        -O ${prefix}.g.vcf \\
         ${args1}
     
     gatk GenotypeGVCFs \\
         -R ${reference} \\
-        --variant ${ref_name}.combined_panel.g.vcf \\
-        -O ${ref_name}.combined_panel.vcf \\
-        --TMP_DIR ${tmp_dir} \\
+        --variant ${prefix}.g.vcf \\
+        -O ${prefix}.vcf \\
+        --create-output-variant-index true \\
         ${args2}
 
     cat <<-END_VERSIONS > versions.yml
@@ -52,14 +50,14 @@ process COMBINE_AND_GENOTYPE_VCF {
     """
 
     stub:
-    def ref_name = params.refname ?: meta.id
+    def prefix = "${meta}"
     """
-    touch ${ref_name}.combined_panel.vcf
-    touch ${ref_name}.combined_panel.vcf.idx
+    touch ${prefix}.vcf
+    touch ${prefix}.vcf.idx
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}' || echo "4.2.6.1")
+        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}')
     END_VERSIONS
     """
 }

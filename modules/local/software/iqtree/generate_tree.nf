@@ -28,10 +28,9 @@ process GENERATE_TREE {
     def prefix = task.ext.prefix ?: "${phylip.baseName}"
     def threads = task.ext.threads ?: task.cpus
     def sequence_type = task.ext.sequence_type ?: "DNA"
-    //def model = task.ext.model ?: "TEST"
+    // def model = task.ext.model ?: "TEST"
     def bootstrap = task.ext.bootstrap ?: "1000"
     def alrt = task.ext.alrt ?: "1000"
-    def outgroup = task.ext.outgroup ? "-o ${task.ext.outgroup}" : ""
     def memory = task.ext.memory ? "-mem ${task.ext.memory}" : ""
     """
     iqtree \\
@@ -39,10 +38,8 @@ process GENERATE_TREE {
         -s ${phylip} \\
         -pre ${prefix} \\
         -st ${sequence_type} \\
-        -m ${model} \\
         -bb ${bootstrap} \\
         -alrt ${alrt} \\
-        ${outgroup} \\
         ${memory} \\
         ${args}
 

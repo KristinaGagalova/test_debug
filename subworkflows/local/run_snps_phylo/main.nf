@@ -62,32 +62,40 @@ workflow UBAM_QC_AND_MAPPING {
     
     emit:
         ubam      = MARK_ILLUMINA_ADAPTERS.out.marked_ubam      // tuple(meta, ubam)
-        bam       = MERGE_BAM_WITH_UBAM.out.bam                 // tuple(meta, bam)
-        bam_index = MERGE_BAM_WITH_UBAM.out.bai                 // tuple(meta, bai)
+        bam       = MERGE_BAM_WITH_UBAM.out.bam                 // tuple(meta, bam, bai)
+        //bam_index = MERGE_BAM_WITH_UBAM.out.bai                 // tuple(meta, bai)
 }
 
 workflow VCF_GENOTYPING_AND_FILTERING {
     take:
-        gvcfs     // tuple(meta, gvcf)
+        meta      // meta value for sample name
+        gvcfs     // tuple(meta, gvcf) # collected gvcfs 
         reference // tuple(meta, fasta)
-        fai_index // tuple(meta, index)
-        // seq_dict  // tuple(meta, seq_dict)
+        fa_index  // tuple(meta, index)
+        seq_dict  // tuple(meta, seq_dict)
 
     main:
-        COMBINE_AND_GENOTYPE_VCF(gvcfs, reference, fai_index)
-        FILTER_SNPS_AND_INDELS(COMBINE_AND_GENOTYPE_VCF.out.vcf, \
-                                COMBINE_AND_GENOTYPE_VCF.out.vcf_index, 
-                                reference, fai_index)
-        QUALITY_FILTER_VARIANTS(FILTER_SNPS_AND_INDELS.out.snps_vcf,
-                                FILTER_SNPS_AND_INDELS.out.snps_vcf_index,
-                                FILTER_SNPS_AND_INDELS.out.indels_vcf,
-                                FILTER_SNPS_AND_INDELS.out.indels_vcf_index,
-                                reference,
-                                fai_index)
-        FINAL_FILTER_VARIANTS(QUALITY_FILTER_VARIANTS.out.filtered_snps_vcf,
-			        QUALITY_FILTER_VARIANTS.out.filtered_snps_vcf_index,
-				QUALITY_FILTER_VARIANTS.out.filtered_indels_vcf,
-				QUALITY_FILTER_VARIANTS.out.filtered_indels_vcf_index)
+
+        // Extract values from tuples - these are already channels
+        reference_val = reference.map { meta, fasta -> fasta }.first()
+        fa_index_val = fa_index.map { meta, index -> index }.first()
+        seq_dict_val = seq_dict.map { meta, index -> index }.first()
+        
+        COMBINE_AND_GENOTYPE_VCF(meta, gvcfs, reference_val, fa_index_val, seq_dict_val)
+        // reintroduce meta id
+        transformed_channel = COMBINE_AND_GENOTYPE_VCF.out.vcf.map { meta_string, vcf, idx ->
+ 		   	def meta_map = [id: meta_string]
+    		   	[meta_map, vcf, idx]
+			}
+        FILTER_SNPS_AND_INDELS(transformed_channel,
+                                reference_val,
+				fa_index_val,
+				seq_dict_val)
+        QUALITY_FILTER_VARIANTS(FILTER_SNPS_AND_INDELS.out.vcfs,
+                                reference_val,
+                                fa_index_val,
+				seq_dict_val)
+        FINAL_FILTER_VARIANTS(QUALITY_FILTER_VARIANTS.out.filtered_vcfs)
     
     emit:
         vcf = FINAL_FILTER_VARIANTS.out.vcf // tuple(meta, vcf)
@@ -99,7 +107,7 @@ workflow BUILD_TREE {
 
     main:
         VCF_TO_PHYLIP(vcf)
-        GENERATE_TREE(VCF_TO_PHYLIP.out.fasta)
+        GENERATE_TREE(VCF_TO_PHYLIP.out.phylip)
     
     emit:
         tree = GENERATE_TREE.out.tree // tuple(meta, tree)

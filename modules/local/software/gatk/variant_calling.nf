@@ -9,16 +9,13 @@ process VARIANT_CALLING {
         'broadinstitute/gatk:4.2.6.1' }"
 
     input:
-    tuple val(meta), path(bam)
-    tuple val(meta_bai), path(bam_index)
-    // ----
-    tuple val(meta_ref), path(reference)
-    tuple val(meta_fai), path(fai_index)
-    tuple val(meta_dict), path(seq_dict)
+    tuple val(meta), path(bam), path(bam_index)
+    path(reference)
+    path(fai_index)
+    path(seq_dict)
 
     output:
     tuple val(meta), path("${meta.id}.g.vcf"), emit: gvcf
-    tuple val(meta), path("${meta.id}.g.vcf.idx"), emit: gvcf_index
     path "versions.yml", emit: versions
 
     when:
@@ -58,11 +55,10 @@ process VARIANT_CALLING {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.g.vcf
-    touch ${prefix}.g.vcf.idx
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: 4.2.6.1
+        gatk4: \$(gatk --version 2>&1 | grep -E '^(GATK|The Genome Analysis Toolkit)' | sed 's/.*v//' | head -n1 )
     END_VERSIONS
     """
 }

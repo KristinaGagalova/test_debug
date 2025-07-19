@@ -22,13 +22,13 @@ process VCF_TO_PHYLIP {
 
     script:
     def args = task.ext.args ?: ''
-    def ref_name = params.refname ?: meta.id
+    def ref_name = meta.id
     def output_fasta = task.ext.output_fasta ? "--fasta" : ""
     def output_phylip = task.ext.output_phylip ? "--phylip-sequential" : ""
     def output_nexus = task.ext.output_nexus ? "--nexus" : ""
     def prefix = task.ext.prefix ?: ""
     """
-    python3 vcf2phylip.py \\
+    vcf2phylip.py \\
         -i ${vcf} \\
         ${output_fasta} \\
         ${output_phylip} \\
@@ -44,7 +44,7 @@ process VCF_TO_PHYLIP {
     """
 
     stub:
-    def ref_name = params.refname ?: meta.id
+    def ref_name = meta.id
     def output_fasta = task.ext.output_fasta ? "--fasta" : ""
     def output_nexus = task.ext.output_nexus ? "--nexus" : ""
     def prefix = task.ext.prefix ?: ref_name

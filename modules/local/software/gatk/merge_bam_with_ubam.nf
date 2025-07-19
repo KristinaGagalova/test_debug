@@ -15,7 +15,7 @@ process MERGE_BAM_WITH_UBAM {
     path(dict)
 
     output:
-    tuple val(meta), path("${meta.id}.final.bam")    , emit: bam
+    tuple val(meta), path("${meta.id}.final.bam"), path("${meta.id}.final.bam.bai") , emit: bam
     tuple val(meta), path("${meta.id}.final.bam.bai"), emit: bai
     path "versions.yml"                              , emit: versions
 

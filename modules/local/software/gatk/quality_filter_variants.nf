@@ -9,19 +9,14 @@ process QUALITY_FILTER_VARIANTS {
         null }"
 
     input:
-    tuple val(meta), path(snp_vcf)
-    tuple val(meta1), path(snp_vcf_index)
-    tuple val(meta2), path(indel_vcf)
-    tuple val(meta3), path(indel_vcf_index)
-    tuple val(ref_meta), path(reference)
-    tuple val(fai_meta), path(fai_index)
-    // tuple val(dict_meta), path(seq_dict)
+    tuple val(meta), path(snp_vcf), path(snp_vcf_index), path(indel_vcf), path(indel_vcf_index)
+    path(reference)
+    path(fai_index)
+    path(seq_dict)
 
     output:
-    tuple val(meta), path("*.filtered.snps.vcf")     , emit: filtered_snps_vcf
-    tuple val(meta), path("*.filtered.snps.vcf.idx") , emit: filtered_snps_vcf_index
-    tuple val(meta), path("*.filtered.indels.vcf")   , emit: filtered_indels_vcf
-    tuple val(meta), path("*.filtered.indels.vcf.idx"), emit: filtered_indels_vcf_index
+    tuple val(meta), path("${meta.id}.filtered.snps.vcf"), path("${meta.id}.filtered.snps.vcf.idx"),
+	path("${meta.id}.filtered.indels.vcf"), path("${meta.id}.filtered.indels.vcf.idx"), emit: filtered_vcfs
     path "versions.yml"                              , emit: versions
 
     when:
@@ -31,7 +26,7 @@ process QUALITY_FILTER_VARIANTS {
     def args1 = task.ext.args1 ?: ''  // VariantFiltration SNPs args
     def args2 = task.ext.args2 ?: ''  // VariantFiltration INDELs args
     def tmp_dir = task.ext.tmp_dir ?: "tmp"
-    def ref_name = params.refname ?: meta.id
+    def prefix = meta.id
     
     // SNP filter parameters
     def snp_qd = task.ext.snp_qd ?: "2.0"
@@ -60,7 +55,7 @@ process QUALITY_FILTER_VARIANTS {
         -filter "MQ < ${snp_mq}" --filter-name "MQ${snp_mq}" \\
         -filter "MQRankSum < ${snp_mqranksum}" --filter-name "MQRankSum${snp_mqranksum}" \\
         -filter "ReadPosRankSum < ${snp_readposranksum}" --filter-name "ReadPosRankSum${snp_readposranksum}" \\
-        -O ${ref_name}.combined_panel.filtered.snps.vcf \\
+        -O ${prefix}.filtered.snps.vcf \\
         --tmp-dir ${tmp_dir} \\
         ${args1}
 	
@@ -71,7 +66,7 @@ process QUALITY_FILTER_VARIANTS {
         -filter "QUAL < ${indel_qual}" --filter-name "QUAL${indel_qual}" \\
         -filter "FS > ${indel_fs}" --filter-name "FS${indel_fs}" \\
         -filter "ReadPosRankSum < ${indel_readposranksum}" --filter-name "ReadPosRankSum${indel_readposranksum}" \\
-        -O ${ref_name}.combined_panel.filtered.indels.vcf \\
+        -O ${prefix}.filtered.indels.vcf \\
         --tmp-dir ${tmp_dir} \\
         ${args2}
 
@@ -82,16 +77,16 @@ process QUALITY_FILTER_VARIANTS {
     """
 
     stub:
-    def ref_name = params.refname ?: meta.id
+    def prefix = meta.id
     """
-    touch ${ref_name}.combined_panel.filtered.snps.vcf
-    touch ${ref_name}.combined_panel.filtered.snps.vcf.idx
-    touch ${ref_name}.combined_panel.filtered.indels.vcf
-    touch ${ref_name}.combined_panel.filtered.indels.vcf.idx
+    touch ${prefix}.filtered.snps.vcf
+    touch ${prefix}.filtered.snps.vcf.idx
+    touch ${prefix}.filtered.indels.vcf
+    touch ${prefix}.filtered.indels.vcf.idx
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}' || echo "4.2.6.1")
+        gatk4: \$(gatk --version 2>&1 | grep -E '^The Genome Analysis Toolkit' | awk '{print \$6}')
     END_VERSIONS
     """
 }
