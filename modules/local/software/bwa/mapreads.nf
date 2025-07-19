@@ -10,8 +10,8 @@ process BWA_MAPREADS {
 
     input:
     tuple val(meta), path(reads)  // Can be single interleaved file or paired files
-    tuple val(meta2), path(index)
-    tuple val(meta3), path(reference)
+    path(index)
+    path(reference)
 
     output:
     tuple val(meta), path("${meta.id}.bam"), emit: bam

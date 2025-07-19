@@ -39,7 +39,7 @@ workflow SNPS_PHYLO_WORKFLOW {
     UBAM_QC_AND_MAPPING(
         fastq,
         GENERATE_UBAM.out.ubam, 
-        ref_tuple, 
+        ref_tuple,  // Extract just the fasta file
         CREATE_INDEX.out.ref_bundle,
         CREATE_INDEX.out.bwa_index
     )

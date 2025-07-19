@@ -31,8 +31,8 @@ workflow CREATE_INDEX {
             }
 
     emit:
-        bwa_index = BWA_INDEX.out.index      // tuple(meta, index)
-        seq_dict = DICT_REF.out.index        // tuple(meta, index)
+        bwa_index = BWA_INDEX.out.index      // tuple(meta), path(index) path to files
+        seq_dict = DICT_REF.out.index        // path(index)
         ref_bundle = ref_bundle              // tuple(meta, fasta, fai, dict)
 }
 
@@ -40,13 +40,19 @@ workflow UBAM_QC_AND_MAPPING {
     take:
         reads      // tuple(meta, reads)
         ubams      // tuple(meta, ubam)
-        reference  // tuple(meta, reference)
+        reference  // path(reference)
         ref_bundle // tuple(meta, fasta, fai, dict)
-        bwa_index  // tuple(meta, index)
+        bwa_index  // path(index)
 
     main:
         MARK_ILLUMINA_ADAPTERS(reads, ubams)
-        ALIGN_TO_REF_UBAM(MARK_ILLUMINA_ADAPTERS.out.marked_fastq, bwa_index, reference)
+        // Create value channels from the single files
+        bwa_index_val = bwa_index.map { meta, index -> index }.first()
+        reference_val = reference.map { meta, fasta -> fasta }.first()
+
+        ALIGN_TO_REF_UBAM(MARK_ILLUMINA_ADAPTERS.out.marked_fastq,
+				bwa_index_val,
+				reference_val)
         INDEX_BAM(ALIGN_TO_REF_UBAM.out.bam)
         MARK_DUPLICATES(INDEX_BAM.out.bam)
 
